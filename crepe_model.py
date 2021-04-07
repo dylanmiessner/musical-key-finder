@@ -44,7 +44,7 @@ def analyze_audio(filename):
 def play_audio(filename):
     data, fs = sf.read(filename, dtype='float32')
     sd.play(data, fs)
-    status = sd.wait()
+    # status = sd.wait()
 
 def determine_notes(frequency, confidence):
     A4 = 440

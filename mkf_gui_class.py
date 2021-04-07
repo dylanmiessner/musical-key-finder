@@ -19,8 +19,8 @@ class mkf_gui:
     test_iterator = 0
     test_score = 0
     test_answer = 0
-    # begin by creating a list, 1-13, for each possible scale including chromatic
     test_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+    test_buttons_shown = False
     mkf = gui("Musical Key Finder", "1000x800")
 
     # the default constructor for when the class is called, in order to create the mkf gui
@@ -29,6 +29,7 @@ class mkf_gui:
         self.draw_labels()
         self.draw_images()
         self.draw_buttons()
+        self.create_test_gui()
         self.mkf.go()
 
     # this function simply handles drawing the background
@@ -85,6 +86,32 @@ class mkf_gui:
         self.mkf.clearImageCache()
         self.mkf.addImage("image", "./images/treble_clef.png")
 
+    def create_test_gui(self):
+        # draw the test subwindow
+        self.mkf.startSubWindow("Test Mode", modal=True)
+        self.mkf.setBg("light blue")
+        self.mkf.setFont(18)
+        self.mkf.setSize(1000, 800)
+
+        # add in the label for the test subwindow
+        self.mkf.addLabel("test", "Testing Mode: Question 1 of 13")
+        self.mkf.setLabelBg("test", "white")
+        self.mkf.setLabelFg("test", "blue")
+
+        # draw all the buttons for the test sub window
+        self.mkf.addButton("Replay Audio", self.play_scale)
+        self.mkf.addButtons(["A", "A#"], self.get_test_answer)
+        self.mkf.addButtons(["B", "B#/C"], self.get_test_answer)
+        self.mkf.addButtons(["C", "C#"], self.get_test_answer)
+        self.mkf.addButtons(["D", "D#"], self.get_test_answer)
+        self.mkf.addButtons(["E", "E#/F"], self.get_test_answer)
+        self.mkf.addButtons(["F", "F#"], self.get_test_answer)
+        self.mkf.addButtons(["G", "G#"], self.get_test_answer)
+        self.mkf.addButton("Chromatic", self.get_test_answer)
+        self.mkf.addButton("Close", self.press)
+
+        self.mkf.stopSubWindow()
+
     ###################################################################
     # this press function handles all button presses that occur within the GUI
     ###################################################################
@@ -132,6 +159,11 @@ class mkf_gui:
         elif button == "Record Permanent": # open a saving dialog box, otherwise continue as normal
             filename = self.save_file()
             self.record_functionality(filename)
+
+        # close the sub window
+        elif button == "Close":
+            self.mkf.hideSubWindow("Test Mode")
+            self.main_menu()
 
     ############################################################################
     # these blocks of code handle functionality within the GUI, like analyzing
@@ -235,24 +267,14 @@ class mkf_gui:
 
     # this function sets the GUI to be ready for testing mode
     def test_style(self):
+        # ensure all other buttons are closed
         self.style_change()
-        self.mkf.hideImage("image")
-        self.mkf.setLabel("title", "Testing Mode: Question 1 of 13")
-        self.mkf.addButton("Replay Audio", self.play_scale)
-        self.mkf.addButtons(["A", "A#"], self.get_test_answer)
-        self.mkf.addButtons(["B", "B#/C"], self.get_test_answer)
-        self.mkf.addButtons(["C", "C#"], self.get_test_answer)
-        self.mkf.addButtons(["D", "D#"], self.get_test_answer)
-        self.mkf.addButtons(["E", "E#/F"], self.get_test_answer)
-        self.mkf.addButtons(["F", "F#"], self.get_test_answer)
-        self.mkf.addButtons(["G", "G#"], self.get_test_answer)
-        self.mkf.addButton("Chromatic", self.get_test_answer)
+        self.mkf.showSubWindow("Test Mode")
 
     # return to main menu from anything
     # this also resets all choices that have been made
     def main_menu(self):
         self.reset_browse()
-
         self.mkf.setImage("image", "./images/treble_clef.png")
         self.mkf.setLabel("title", "Musical Key Finder")
         self.mkf.showImage("image")
@@ -313,30 +335,14 @@ class mkf_gui:
         # the next task is to handle the GUI modification so that 13 options are drawn on the screen
         # and the image is hidden
         if self.test_iterator >= 13:
-            self.mkf.removeButton("A")
-            self.mkf.removeButton("B")
-            self.mkf.removeButton("C")
-            self.mkf.removeButton("D")
-            self.mkf.removeButton("E")
-            self.mkf.removeButton("F")
-            self.mkf.removeButton("G")
-            self.mkf.removeButton("A#")
-            self.mkf.removeButton("B#/C")
-            self.mkf.removeButton("C#")
-            self.mkf.removeButton("D#")
-            self.mkf.removeButton("E#/F")
-            self.mkf.removeButton("F#")
-            self.mkf.removeButton("G#")
-            self.mkf.removeButton("Chromatic")
-            self.mkf.removeButton("Replay Audio")
-            self.mkf.showButton("Main Menu")
+            self.hide_test_buttons()
 
             if self.test_score >= 9:
-                self.mkf.setLabel("title", "Your score was " + str(self.test_score) + " out of 13! Excellent work!")
+                self.mkf.setLabel("test", "Your score was " + str(self.test_score) + " out of 13! Excellent work!")
             else:
-                self.mkf.setLabel("title", "Your score was " + str(self.test_score) + " out of 13.  Keep practicing!")
+                self.mkf.setLabel("test", "Your score was " + str(self.test_score) + " out of 13.  Keep practicing!")
         else:
-            self.mkf.setLabel("title", "Testing Mode: Question " + str(self.test_iterator + 1) + " of 13")
+            self.mkf.setLabel("test", "Testing Mode: Question " + str(self.test_iterator + 1) + " of 13")
             self.play_scale()
 
 
@@ -384,7 +390,54 @@ class mkf_gui:
 
     # this function sets all the variables back to their default's and shuffles the list so the test is not the same each time
     def setup_test(self):
+        if not self.test_buttons_shown:
+            self.show_test_buttons()
+        
         self.test_answer = 0
-        self.test_iterator = 0
+        self.test_iterator = 12
         self.test_score = 0
         random.shuffle(self.test_list)
+
+    def show_test_buttons(self):
+        self.mkf.showButton("A")
+        self.mkf.showButton("B")
+        self.mkf.showButton("C")
+        self.mkf.showButton("D")
+        self.mkf.showButton("E")
+        self.mkf.showButton("F")
+        self.mkf.showButton("G")
+        self.mkf.showButton("A#")
+        self.mkf.showButton("B#/C")
+        self.mkf.showButton("C#")
+        self.mkf.showButton("D#")
+        self.mkf.showButton("E#/F")
+        self.mkf.showButton("F#")
+        self.mkf.showButton("G#")
+        self.mkf.showButton("Chromatic")
+        self.mkf.showButton("Replay Audio")
+        self.mkf.hideButton("Close")
+
+        # update the button tracker
+        self.test_buttons_shown = True
+
+    def hide_test_buttons(self):
+        self.mkf.hideButton("A")
+        self.mkf.hideButton("B")
+        self.mkf.hideButton("C")
+        self.mkf.hideButton("D")
+        self.mkf.hideButton("E")
+        self.mkf.hideButton("F")
+        self.mkf.hideButton("G")
+        self.mkf.hideButton("A#")
+        self.mkf.hideButton("B#/C")
+        self.mkf.hideButton("C#")
+        self.mkf.hideButton("D#")
+        self.mkf.hideButton("E#/F")
+        self.mkf.hideButton("F#")
+        self.mkf.hideButton("G#")
+        self.mkf.hideButton("Chromatic")
+        self.mkf.hideButton("Replay Audio")
+        self.mkf.showButton("Close")
+
+        # update the button tracker
+        self.test_buttons_shown = False
