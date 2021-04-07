@@ -394,10 +394,11 @@ class mkf_gui:
             self.show_test_buttons()
         
         self.test_answer = 0
-        self.test_iterator = 12
+        self.test_iterator = 0
         self.test_score = 0
         random.shuffle(self.test_list)
 
+    # this function exists in order to reduce code redundancy, simply shows buttons
     def show_test_buttons(self):
         self.mkf.showButton("A")
         self.mkf.showButton("B")
@@ -420,6 +421,7 @@ class mkf_gui:
         # update the button tracker
         self.test_buttons_shown = True
 
+    # likewise, this function exists to reduce code redundancy. hides buttons
     def hide_test_buttons(self):
         self.mkf.hideButton("A")
         self.mkf.hideButton("B")
