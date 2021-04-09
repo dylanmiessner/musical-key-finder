@@ -292,8 +292,6 @@ class mkf_gui:
 
     # returns a number based on the button that they hit
     def get_test_answer(self, button):
-
-        # create a bytes like input for each answer
         if button == "A":
             self.test_answer = 1
         elif button == "B":

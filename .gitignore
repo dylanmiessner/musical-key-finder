@@ -1,2 +1,5 @@
 outdated/
 __pycache__/
+build/
+dist/
+mkf.spec
